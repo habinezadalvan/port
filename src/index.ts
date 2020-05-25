@@ -4,6 +4,7 @@ import {buildSchema} from 'type-graphql';
 import { ApolloServer } from 'apollo-server-express';
 import { createConnection } from "typeorm";
 import 'dotenv/config';
+import cookieParser from 'cookie-parser';
 import logger from './config/logger';
 import { UserResolvers } from './graphql/resolvers/userResolvers';
 import router from './RESTfulApi/routes';
@@ -11,9 +12,12 @@ import router from './RESTfulApi/routes';
 (async () =>{
     const app = express();
 
-    await createConnection();
+    app.use(cookieParser());
 
+    
     app.use(router)
+
+    await createConnection();
 
     const apolloServer = new ApolloServer({
        schema: await buildSchema({
