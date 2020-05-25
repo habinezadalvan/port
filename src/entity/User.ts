@@ -26,7 +26,7 @@ export class User extends BaseEntity {
     email: string;
 
     @Column('text')
-    password: String
+    password: string
 
     @Field()
     @Column('text')

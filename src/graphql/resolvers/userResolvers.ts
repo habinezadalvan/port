@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Arg } from 'type-graphql';
 import { ApolloError } from 'apollo-server-express';
-import {hashPassword} from '../../helpers/user.helpers';
+import {hashPassword, comparePassword, generateToken} from '../../helpers/user.helpers';
 import { User } from '../../entity/User';
 import { AccessToken } from '../types/user.types';
 
@@ -23,10 +23,10 @@ export class UserResolvers {
         @Arg('password') password: string
     ): Promise<AccessToken>{
         const user = await User.findOne({where : {email}});
-        if(!user) throw new ApolloError('Incorrect email or password!')
-        
+        if(!user || (!comparePassword(password, user.password))) throw new ApolloError('Incorrect email or password!');
+        const {password: hashedUserPassword, ...rest} = user;
         return {
-            accessToken:""
+            accessToken: generateToken(rest),
         }
     }
 
