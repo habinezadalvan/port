@@ -6,3 +6,4 @@ export class AccessToken {
     @Field()
     accessToken: string
 }
+

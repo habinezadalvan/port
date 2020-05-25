@@ -14,7 +14,8 @@ import { UserResolvers } from './graphql/resolvers/userResolvers';
     const apolloServer = new ApolloServer({
        schema: await buildSchema({
            resolvers: [ UserResolvers ],
-       })
+       }),
+       context: ({req, res}) => ({req, res}),
     })
     apolloServer.applyMiddleware({app});
     const port = process.env.PORT || 5000;

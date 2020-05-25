@@ -1,8 +1,9 @@
-import { Resolver, Query, Mutation, Arg } from 'type-graphql';
+import { Resolver, Query, Mutation, Arg, Ctx } from 'type-graphql';
 import { ApolloError } from 'apollo-server-express';
 import {hashPassword, comparePassword, generateToken} from '../../helpers/user.helpers';
 import { User } from '../../entity/User';
 import { AccessToken } from '../types/user.types';
+import { ContextInterface } from '../types/context.type';
 
 @Resolver()
 export class UserResolvers {
@@ -20,13 +21,15 @@ export class UserResolvers {
     @Mutation(() => AccessToken)
     async login(
         @Arg('email')  email: string,
-        @Arg('password') password: string
+        @Arg('password') password: string,
+        @Ctx() {res}: ContextInterface,
     ): Promise<AccessToken>{
         const user = await User.findOne({where : {email}});
         if(!user || (!comparePassword(password, user.password))) throw new ApolloError('Incorrect email or password!');
         const {password: hashedUserPassword, ...rest} = user;
+        res.cookie('jid', generateToken(rest, '7d'),{httpOnly: true});
         return {
-            accessToken: generateToken(rest),
+            accessToken: generateToken(rest, '15min'),
         }
     }
 
