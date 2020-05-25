@@ -32,4 +32,7 @@ export class User extends BaseEntity {
     @Column('text')
     avatar?: string
 
+    @Column('int', {default: 0})
+    tokenVersion: number
+
 }

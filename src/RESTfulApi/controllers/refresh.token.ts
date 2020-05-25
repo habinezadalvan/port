@@ -7,7 +7,9 @@ const {REFRESH_TOKEN_SECRET_KEY} = process.env;
 
 export const refreshTokenController = async (req:Request, res: Response) => {
     const token = req.cookies.jid;
-    if(!token) res.send({ok: false, accessToken: ''});
+    if(!token) {
+        res.send({ok: false, accessToken: ''});
+    }
 
     let payload: any = null;
 
@@ -18,10 +20,16 @@ export const refreshTokenController = async (req:Request, res: Response) => {
     }
 
     const findUser = await User.findOne({id: payload.id })
-    if(!findUser) res.send({ok: false, accessToken: ''});
+    if(!findUser) {
+        return res.send({ok: false, accessToken: ''});
+    }
 
     const {password, ...rest} = findUser!; 
     
+    if(findUser?.tokenVersion !== payload.tokenVersion) {
+        return res.send({ok: false, accessToken: ''});
+    }
+
     const refreshToken = generateRefreshToken(rest);
     sendRefreshToken(res, refreshToken);
 

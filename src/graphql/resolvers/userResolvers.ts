@@ -5,6 +5,7 @@ import {
   Arg,
   Ctx,
   UseMiddleware,
+  Int
 } from "type-graphql";
 import { ApolloError } from "apollo-server-express";
 import {
@@ -18,6 +19,7 @@ import { User } from "../../entity/User";
 import { AccessToken } from "../types/user.types";
 import { ContextInterface } from "../types/context.type";
 import { isAuth } from "../../helpers/isAuth";
+import { getConnection } from "typeorm";
 
 @Resolver()
 export class UserResolvers {
@@ -39,6 +41,15 @@ export class UserResolvers {
     return res;
   }
 
+
+  @Mutation(() => Boolean)
+  async revokeRefreshTokenForUser(
+      @Arg('id', () => Int) id: number,
+  ){
+    await getConnection().getRepository(User).increment({id},'tokenVersion', 1);
+    return true;
+  }
+
   @Mutation(() => AccessToken)
   async login(
     @Arg("email") email: string,
@@ -53,9 +64,10 @@ export class UserResolvers {
     // send refresh token in cookies
     const refreshToken = generateRefreshToken(rest);
     sendRefreshToken(res, refreshToken);
-    
+
+    const {tokenVersion, ...restWithOutTokenVersion} = rest;
     return {
-      accessToken: generateAccessToken(rest),
+      accessToken: generateAccessToken(restWithOutTokenVersion),
     };
   }
 
