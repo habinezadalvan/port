@@ -1,9 +1,10 @@
-import { Resolver, Query, Mutation, Arg, Ctx } from 'type-graphql';
+import { Resolver, Query, Mutation, Arg, Ctx, UseMiddleware} from 'type-graphql';
 import { ApolloError } from 'apollo-server-express';
 import {hashPassword, comparePassword, generateToken} from '../../helpers/user.helpers';
 import { User } from '../../entity/User';
 import { AccessToken } from '../types/user.types';
 import { ContextInterface } from '../types/context.type';
+import {isAuth} from '../../helpers/isAuth';
 
 @Resolver()
 export class UserResolvers {
@@ -12,7 +13,16 @@ export class UserResolvers {
         return 'hello world'
     }
 
+    @Query(() => String)
+    @UseMiddleware(isAuth)
+    async payload(
+        @Ctx() {user}: ContextInterface
+    ){
+        return `your id is ${user!.id}`;
+    }
+
     @Query(() => [User])
+    @UseMiddleware()
     async users(){
         const res = await User.find();
         return res;
