@@ -14,5 +14,5 @@ export const generateRefreshToken = (payload: any) => sign(payload, `${REFRESH_T
 export const comparePassword = (password: string, hashedPassword: string) => compareSync(password, hashedPassword)
 
 export const sendRefreshToken = (res: Response, token: string) => {
-    res.cookie('jid', token ,{httpOnly: true});
+    res.cookie('jid', token ,{httpOnly: true, path:'/refresh_token'});
 }
